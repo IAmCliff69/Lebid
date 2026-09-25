@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { getTasks } from '../utils/storage'
 
+const DAILY_LIMIT = 10
+
 const API_URL = 'https://lebid-api-production.up.railway.app/chat'
 
 const SUGGESTIONS = [
@@ -11,6 +13,12 @@ const SUGGESTIONS = [
 ]
 
 export default function AIAssistant() {
+  const [requestCount, setRequestCount] = useState(() => {
+    const today = new Date().toDateString()
+    const stored = JSON.parse(localStorage.getItem('lebid_ai_usage') || '{}')
+    if (stored.date !== today) return 0
+    return stored.count || 0
+  })
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -27,7 +35,12 @@ export default function AIAssistant() {
 
   async function send(text) {
     const userText = (text || input).trim()
-    if (!userText || loading) return
+    if (!userText || loading || requestCount >= DAILY_LIMIT) return
+
+    const today = new Date().toDateString()
+    const newCount = requestCount + 1
+    setRequestCount(newCount)
+    localStorage.setItem('lebid_ai_usage', JSON.stringify({ date: today, count: newCount }))
 
     setInput('')
     setMessages(m => [...m, { role: 'user', text: userText }])
@@ -91,19 +104,40 @@ ${taskSummary}`
     <div className="max-w-2xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2
-            className="text-3xl font-bold mb-1"
-            style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
-          >
-            AI Assistant
-          </h2>
-          <p style={{ color: 'var(--text-2)' }} className="text-sm">
-            Powered by Gemini · sees your schedule
-          </p>
-        </div>
-      </div>
+<div className="flex items-center justify-between mb-4">
+  <div>
+    <h2
+      className="text-3xl font-bold mb-1"
+      style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
+    >
+      AI Assistant
+    </h2>
+    <p style={{ color: 'var(--text-2)' }} className="text-sm">
+      Powered by Gemini · sees your schedule
+    </p>
+  </div>
+
+  {/* Request counter */}
+  <div
+    className="flex flex-col items-center justify-center rounded-2xl px-4 py-2"
+    style={{
+      background: requestCount >= DAILY_LIMIT
+        ? 'linear-gradient(135deg, #ff4d4d, #c0392b)'
+        : requestCount >= 7
+        ? 'linear-gradient(135deg, #f39c12, #e67e22)'
+        : 'linear-gradient(135deg, var(--accent), #7c3aed)',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
+      minWidth: '80px',
+    }}
+  >
+    <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Sora, sans-serif', lineHeight: 1 }}>
+      {DAILY_LIMIT - requestCount}
+    </span>
+    <span className="text-xs text-white mt-0.5" style={{ opacity: 0.85 }}>
+      {requestCount >= DAILY_LIMIT ? 'limit reached' : 'left today'}
+    </span>
+  </div>
+</div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-3 mb-4 pr-1">
@@ -167,6 +201,14 @@ ${taskSummary}`
       )}
 
       {/* Input */}
+      {requestCount >= DAILY_LIMIT && (
+        <div
+          className="text-center text-sm py-2 mb-2 rounded-xl"
+          style={{ backgroundColor: 'var(--surface)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
+        >
+          You've used all 10 requests for today. Come back tomorrow!
+        </div>
+      )}
       <div
         className="flex gap-2 items-end rounded-xl border p-2"
         style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}
@@ -182,7 +224,7 @@ ${taskSummary}`
         />
         <button
           onClick={() => send()}
-          disabled={!input.trim() || loading}
+          disabled={!input.trim() || loading || requestCount >= DAILY_LIMIT}
           className="px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-40"
           style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
         >
