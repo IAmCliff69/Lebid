@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getTasks } from '../utils/storage'
 
-const API_URL = 'http://localhost:3000/chat'
+const API_URL = 'https://lebid-api-production.up.railway.app/chat'
 
 const SUGGESTIONS = [
   'How should I structure my week?',
