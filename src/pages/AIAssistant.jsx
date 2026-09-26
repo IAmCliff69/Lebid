@@ -12,6 +12,11 @@ const SUGGESTIONS = [
   'Am I taking on too much this week?',
 ]
 
+const WELCOME_MESSAGE = {
+  role: 'assistant',
+  text: "Hi! I'm your Lebid AI assistant. I can see your schedule and help you plan smarter. What would you like help with?",
+}
+
 export default function AIAssistant() {
   const [requestCount, setRequestCount] = useState(() => {
     const today = new Date().toDateString()
@@ -19,19 +24,29 @@ export default function AIAssistant() {
     if (stored.date !== today) return 0
     return stored.count || 0
   })
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      text: "Hi! I'm your Lebid AI assistant. I can see your schedule and help you plan smarter. What would you like help with?",
-    },
-  ])
-  const [input,   setInput]   = useState('')
+
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('lebid_chat_history')
+    if (saved) return JSON.parse(saved)
+    return [WELCOME_MESSAGE]
+  })
+
+  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  useEffect(() => {
+    localStorage.setItem('lebid_chat_history', JSON.stringify(messages))
+  }, [messages])
+
+  function startNewChat() {
+    setMessages([WELCOME_MESSAGE])
+    localStorage.setItem('lebid_chat_history', JSON.stringify([WELCOME_MESSAGE]))
+  }
 
   async function send(text) {
     const userText = (text || input).trim()
@@ -104,42 +119,53 @@ ${taskSummary}`
     <div className="max-w-2xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 48px)' }}>
 
       {/* Header */}
-<div className="flex items-center justify-between mb-4">
-  <div>
-    <h2
-      className="text-3xl font-bold mb-1"
-      style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
-    >
-      AI Assistant
-    </h2>
-    <p style={{ color: 'var(--text-2)' }} className="text-sm">
-      Powered by Gemini · sees your schedule
-    </p>
-  </div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2
+            className="text-3xl font-bold mb-1"
+            style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
+          >
+            AI Assistant
+          </h2>
+          <p style={{ color: 'var(--text-2)' }} className="text-sm">
+            Powered by Gemini · sees your schedule
+          </p>
+        </div>
 
-  {/* Request counter */}
-  <div
-    className="flex flex-col items-center justify-center rounded-2xl px-4 py-2"
-    style={{
-      background: requestCount >= DAILY_LIMIT
-        ? 'linear-gradient(135deg, #ff4d4d, #c0392b)'
-        : requestCount >= 7
-        ? 'linear-gradient(135deg, #f39c12, #e67e22)'
-        : 'linear-gradient(135deg, var(--accent), #7c3aed)',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
-      minWidth: '200px',
-    }}
-  >
-    <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Sora, sans-serif', lineHeight: 1 }}>
-      {DAILY_LIMIT - requestCount}
-    </span>
-    <span className="text-xs text-white mt-0.5" style={{ opacity: 0.85 }}>
-      {requestCount >= DAILY_LIMIT
-        ? 'No requests left today'
-        : `You have ${DAILY_LIMIT - requestCount} request${DAILY_LIMIT - requestCount === 1 ? '' : 's'} left today`}
-    </span>
-  </div>
-</div>
+        <div className="flex flex-col items-end gap-2">
+          {/* New Chat button */}
+          <button
+            onClick={startNewChat}
+            className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-2)', backgroundColor: 'var(--surface)' }}
+          >
+            + New Chat
+          </button>
+
+          {/* Request counter */}
+          <div
+            className="flex flex-col items-center justify-center rounded-2xl px-4 py-2"
+            style={{
+              background: requestCount >= DAILY_LIMIT
+                ? 'linear-gradient(135deg, #ff4d4d, #c0392b)'
+                : requestCount >= 7
+                ? 'linear-gradient(135deg, #f39c12, #e67e22)'
+                : 'linear-gradient(135deg, var(--accent), #7c3aed)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
+              minWidth: '200px',
+            }}
+          >
+            <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Sora, sans-serif', lineHeight: 1 }}>
+              {DAILY_LIMIT - requestCount}
+            </span>
+            <span className="text-xs text-white mt-0.5" style={{ opacity: 0.85 }}>
+              {requestCount >= DAILY_LIMIT
+                ? 'No requests left today'
+                : `You have ${DAILY_LIMIT - requestCount} request${DAILY_LIMIT - requestCount === 1 ? '' : 's'} left today`}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-3 mb-4 pr-1">
