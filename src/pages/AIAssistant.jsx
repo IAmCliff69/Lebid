@@ -127,14 +127,16 @@ ${taskSummary}`
         ? 'linear-gradient(135deg, #f39c12, #e67e22)'
         : 'linear-gradient(135deg, var(--accent), #7c3aed)',
       boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
-      minWidth: '80px',
+      minWidth: '200px',
     }}
   >
     <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Sora, sans-serif', lineHeight: 1 }}>
       {DAILY_LIMIT - requestCount}
     </span>
     <span className="text-xs text-white mt-0.5" style={{ opacity: 0.85 }}>
-      {requestCount >= DAILY_LIMIT ? 'limit reached' : 'left today'}
+      {requestCount >= DAILY_LIMIT
+        ? 'No requests left today'
+        : `You have ${DAILY_LIMIT - requestCount} request${DAILY_LIMIT - requestCount === 1 ? '' : 's'} left today`}
     </span>
   </div>
 </div>
