@@ -11,11 +11,21 @@ import { isOnboarded, updateStreak } from './utils/storage'
 
 function AppInner() {
   const [onboarded, setOnboarded] = useState(isOnboarded())
+  const [theme, setTheme] = useState(() => localStorage.getItem('lebid_theme') || 'dark')
   useNotifications()
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('lebid_theme', theme)
+  }, [theme])
 
   useEffect(() => {
     if (onboarded) updateStreak()
   }, [onboarded])
+
+  function toggleTheme() {
+    setTheme(t => t === 'dark' ? 'light' : 'dark')
+  }
 
   if (!onboarded) {
     return <Onboarding onDone={() => setOnboarded(true)} />
@@ -23,8 +33,8 @@ function AppInner() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg)' }}>
-      <Sidebar />
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+      <Sidebar theme={theme} toggleTheme={toggleTheme} />
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
