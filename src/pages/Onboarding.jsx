@@ -9,10 +9,7 @@ export default function Onboarding({ onDone }) {
   const [error, setError] = useState('')
 
   function handleName() {
-    if (!name.trim()) {
-      setError('Please enter your name.')
-      return
-    }
+    if (!name.trim()) { setError('Please enter your name.'); return }
     setError('')
     setStep('ready')
   }
@@ -22,24 +19,26 @@ export default function Onboarding({ onDone }) {
     onDone()
   }
 
+  const stepIndex = STEPS.indexOf(step)
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'var(--bg)' }}
     >
-      <div className="w-full max-w-md">
-
-        {/* Progress dots */}
-        <div className="flex gap-2 justify-center mb-10">
+      {/* Card */}
+      <div
+        className="w-full max-w-sm rounded-3xl p-8 shadow-xl"
+        style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
+        {/* Progress bar */}
+        <div className="flex gap-1.5 mb-10">
           {STEPS.map((s, i) => (
-            <span
+            <div
               key={s}
-              className="w-2 h-2 rounded-full transition-all"
+              className="h-1 rounded-full flex-1 transition-all duration-300"
               style={{
-                backgroundColor: STEPS.indexOf(step) >= i
-                  ? 'var(--accent)'
-                  : 'var(--border)',
-                transform: STEPS.indexOf(step) === i ? 'scale(1.3)' : 'scale(1)',
+                backgroundColor: stepIndex >= i ? 'var(--accent)' : 'var(--border)',
               }}
             />
           ))}
@@ -48,27 +47,30 @@ export default function Onboarding({ onDone }) {
         {/* Step: Welcome */}
         {step === 'welcome' && (
           <div className="text-center">
+            {/* Logo mark */}
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6"
-              style={{ backgroundColor: 'rgba(108,127,255,0.15)' }}
+              className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8"
+              style={{ backgroundColor: 'var(--accent)' }}
             >
-              ✦
+              <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: '32px', color: '#fff' }}>L</span>
             </div>
+
             <h1
-              className="text-4xl font-bold mb-3"
+              className="text-3xl font-bold mb-3 leading-tight"
               style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
             >
               Welcome to Lebid
             </h1>
-            <p className="text-base mb-10 leading-relaxed" style={{ color: 'var(--text-2)' }}>
+            <p className="text-sm leading-relaxed mb-10" style={{ color: 'var(--text-2)' }}>
               Your AI-powered student planner. Structure your week, stay consistent, and never miss what matters.
             </p>
+
             <button
               onClick={() => setStep('name')}
-              className="w-full py-3 rounded-xl text-base font-semibold transition-opacity hover:opacity-90"
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
             >
-              Get started
+              Get started →
             </button>
           </div>
         )}
@@ -76,15 +78,23 @@ export default function Onboarding({ onDone }) {
         {/* Step: Name */}
         {step === 'name' && (
           <div>
+            <div
+              className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
+              style={{ backgroundColor: 'var(--accent-soft)' }}
+            >
+              <span style={{ fontSize: '22px' }}>👋</span>
+            </div>
+
             <h2
-              className="text-3xl font-bold mb-2"
+              className="text-2xl font-bold mb-2"
               style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
             >
               What's your name?
             </h2>
-            <p className="text-sm mb-8" style={{ color: 'var(--text-2)' }}>
+            <p className="text-sm mb-7" style={{ color: 'var(--text-2)' }}>
               Lebid will use this to personalise your experience.
             </p>
+
             <input
               type="text"
               value={name}
@@ -92,29 +102,30 @@ export default function Onboarding({ onDone }) {
               onKeyDown={e => e.key === 'Enter' && handleName()}
               placeholder="Your first name"
               autoFocus
-              className="w-full px-4 py-3 rounded-xl text-base outline-none border mb-2"
+              className="w-full px-4 py-3.5 rounded-2xl text-sm outline-none border mb-2 transition-all"
               style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: error ? '#FF6B6B' : 'var(--border)',
+                backgroundColor: 'var(--bg)',
+                borderColor: error ? 'var(--danger)' : 'var(--border)',
                 color: 'var(--text-1)',
               }}
             />
             {error && (
-              <p className="text-xs mb-4" style={{ color: '#FF6B6B' }}>{error}</p>
+              <p className="text-xs mb-3" style={{ color: 'var(--danger)' }}>{error}</p>
             )}
+
             <button
               onClick={handleName}
-              className="w-full py-3 rounded-xl text-base font-semibold mt-4 transition-opacity hover:opacity-90"
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold mt-4 transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
             >
-              Continue
+              Continue →
             </button>
             <button
               onClick={() => setStep('welcome')}
-              className="w-full py-2 mt-2 text-sm"
+              className="w-full py-2.5 mt-2 text-sm transition-opacity hover:opacity-70"
               style={{ color: 'var(--text-2)' }}
             >
-              Back
+              ← Back
             </button>
           </div>
         )}
@@ -123,30 +134,49 @@ export default function Onboarding({ onDone }) {
         {step === 'ready' && (
           <div className="text-center">
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6"
-              style={{ backgroundColor: 'rgba(62,207,178,0.15)' }}
+              className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8"
+              style={{ backgroundColor: 'var(--accent-soft)' }}
             >
-              ✓
+              <span style={{ fontSize: '36px' }}>🎉</span>
             </div>
+
             <h2
-              className="text-3xl font-bold mb-3"
+              className="text-2xl font-bold mb-3"
               style={{ fontFamily: 'Sora, sans-serif', color: 'var(--text-1)' }}
             >
               You're all set, {name}!
             </h2>
-            <p className="text-base mb-10 leading-relaxed" style={{ color: 'var(--text-2)' }}>
-              Start by adding your tasks for the week in the Planner. Your AI assistant is ready to help whenever you need it.
+            <p className="text-sm leading-relaxed mb-10" style={{ color: 'var(--text-2)' }}>
+              Start by adding your tasks for the week in the Planner. Your AI assistant is ready whenever you need it.
             </p>
+
+            {/* Feature pills */}
+            <div className="flex flex-col gap-2 mb-8 text-left">
+              {[
+                { icon: '📅', text: 'Plan your week task by task' },
+                { icon: '✨', text: 'Get AI help with your schedule' },
+                { icon: '📊', text: 'Track your consistency over time' },
+              ].map(({ icon, text }) => (
+                <div
+                  key={text}
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                  style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border)' }}
+                >
+                  <span>{icon}</span>
+                  <span className="text-sm" style={{ color: 'var(--text-1)' }}>{text}</span>
+                </div>
+              ))}
+            </div>
+
             <button
               onClick={handleFinish}
-              className="w-full py-3 rounded-xl text-base font-semibold transition-opacity hover:opacity-90"
-              style={{ backgroundColor: 'var(--accent-2)', color: '#0E0F13' }}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
+              style={{ backgroundColor: 'var(--accent)', color: '#fff' }}
             >
-              Open Lebid
+              Open Lebid →
             </button>
           </div>
         )}
-
       </div>
     </div>
   )
